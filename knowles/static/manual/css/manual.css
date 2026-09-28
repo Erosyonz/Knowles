@@ -1,0 +1,284 @@
+/* ===== Color palette (same as dashboard.css) ===== */
+:root {
+  --blue-light: #3d8bcb;
+  --blue-mid:   #2e78c7;
+  --blue-dark:  #235a97;
+  --gray:       #c9c7ce;
+
+  --bg:         #f4f6f9;
+  --surface:    #ffffff;
+  --text:       #1c2a3a;
+  --text-muted: #5f6b7a;
+  --border:     #dfe3ea;
+  --tint:       #e8f1fa;   /* very light blue */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ===== Header ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 32px;
+  background: var(--blue-dark);
+  color: #fff;
+}
+
+.page-header h1 { font-size: 1.4rem; }
+.page-header p  { font-size: 0.9rem; color: var(--gray); margin-top: 2px; }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.back-link:hover { background: rgba(255, 255, 255, 0.24); }
+
+/* ===== Page layout: two columns ===== */
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px;
+  align-items: start;
+}
+
+.col-main, .col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===== Cards ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.card h2 { font-size: 1rem; color: var(--blue-dark); }
+.card-sub { font-size: 0.85rem; color: var(--text-muted); margin: 2px 0 16px; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* ===== Drop zone ===== */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 16px;
+  text-align: center;
+  border: 2px dashed var(--gray);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--blue-mid);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dropzone.is-dragging { background: var(--tint); border-color: var(--blue-mid); }
+
+.dropzone-title { font-weight: 600; color: var(--text); margin-top: 6px; }
+.dropzone-hint  { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+
+/* ===== Buttons ===== */
+.btn-secondary {
+  padding: 8px 18px;
+  border: 1px solid var(--blue-mid);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--blue-mid);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-secondary:hover { background: var(--tint); }
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--blue-mid);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+.btn-primary:disabled { background: var(--gray); cursor: not-allowed; }
+
+.btn-secondary:focus-visible,
+.btn-primary:focus-visible,
+.btn-remove:focus-visible,
+.back-link:focus-visible,
+.field input:focus-visible,
+.check input:focus-visible {
+  outline: 3px solid var(--blue-light);
+  outline-offset: 2px;
+}
+
+/* ===== Uploaded files ===== */
+.count-pill, .status-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--blue-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-pill { background: var(--border); color: var(--text-muted); }
+.status-pill.is-ready { background: #e6f4ec; color: #1f7a4d; }
+
+.upload-list { list-style: none; }
+
+.upload-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--tint);
+  color: var(--blue-dark);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.file-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+.badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-ok  { background: #e6f4ec; color: #1f7a4d; }
+.badge-bad { background: #fdecea; color: #b3261e; }
+
+.btn-remove {
+  flex-shrink: 0;
+  display: flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.btn-remove:hover { background: #fdecea; color: #b3261e; }
+
+.empty-state {
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.empty-state[hidden], .summary-list li[hidden], .generate-note[hidden] { display: none; }
+
+/* ===== Report options form ===== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.field span { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+
+.field input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.field-row { display: flex; gap: 12px; }
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.check input { margin-top: 3px; accent-color: var(--blue-mid); }
+
+.check small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ===== Validation summary ===== */
+.summary-list { list-style: none; font-size: 0.9rem; }
+.summary-list li { padding: 6px 0; color: var(--text); }
+.summary-list .warn { color: #9a5b00; }
+
+.generate-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+
+/* ===== Small screens: one column ===== */
+@media (max-width: 860px) {
+  .page { grid-template-columns: 1fr; padding: 16px; }
+  .page-header { padding: 16px; }
+}
