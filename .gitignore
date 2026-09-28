@@ -49,3 +49,18 @@ staticfiles/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Tailwind & Node Dependencies
+node_modules/
+package-lock.json
+
+# Tailwind Compiled Output File
+# Ignore the generated CSS output since your CLI command rebuilds it automatically
+static/tailwind-output.css
+
+# Optional: Build caches and logs
+.tailwind/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
