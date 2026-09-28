@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingenio | Manual data input</title>
+
+  <!-- Relative path so Live Server works.
+       For Django later: {% load static %} and href="{% static 'manual/css/manual.css' %}" -->
+  <link rel="stylesheet" href="../../static/manual/css/manual.css">
+</head>
+<body>
+
+  <!-- ===== Page header ===== -->
+  <header class="page-header">
+    <!-- Back to home. Back end can swap the href for {% url 'home' %} -->
+    <a class="back-link" href="../home/home.html" aria-label="Back to home">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="16" y1="10" x2="4" y2="10"/><polyline points="9,5 4,10 9,15"/>
+      </svg>
+    </a>
+    <div>
+      <h1>Manual data input</h1>
+      <p>Not sure which files to use? Upload them here and generate a report the same way the automated dashboard does.</p>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- ===== Left column: upload + file list ===== -->
+    <div class="col-main">
+
+      <section class="card">
+        <div class="dropzone" id="dropzone">
+          <svg class="dropzone-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 16V5"/><polyline points="7,9 12,4 17,9"/><path d="M5 16v3h14v-3"/>
+          </svg>
+          <p class="dropzone-title">Drop files here or browse</p>
+          <p class="dropzone-hint">CSV, XLSX, XML, TXT, PDF or JSON</p>
+          <button type="button" class="btn-secondary" id="choose-btn">Choose files</button>
+          <input type="file" id="file-input" multiple hidden
+                 accept=".csv,.xlsx,.xml,.txt,.pdf,.json">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Uploaded files</h2>
+          <span class="count-pill" id="count-pill">0 files</span>
+        </div>
+        <ul class="upload-list" id="upload-list"></ul>
+        <p class="empty-state" id="empty-state">No files yet. Files you add will show up here.</p>
+      </section>
+
+    </div>
+
+    <!-- ===== Right column: options + summary + generate ===== -->
+    <aside class="col-side">
+
+      <section class="card">
+        <h2>Report options</h2>
+        <p class="card-sub">Shape the generated report.</p>
+
+        <label class="field">
+          <span>Report name</span>
+          <input type="text" id="report-name" placeholder="e.g. Q3 test performance">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>From</span>
+            <input type="date" id="date-from">
+          </label>
+          <label class="field">
+            <span>To</span>
+            <input type="date" id="date-to">
+          </label>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="ai-insights" checked>
+          <span>
+            Include key insights
+            <small>Highlight anomalies, trends and recommended actions.</small>
+          </span>
+        </label>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Validation summary</h2>
+          <span class="status-pill" id="status-pill">Waiting</span>
+        </div>
+        <ul class="summary-list">
+          <li id="summary-ready">No files to check yet</li>
+          <li id="summary-bad" class="warn" hidden></li>
+        </ul>
+      </section>
+
+      <button type="button" class="btn-primary" id="generate-btn" disabled>
+        Generate report
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="10" x2="16" y2="10"/><polyline points="11,5 16,10 11,15"/>
+        </svg>
+      </button>
+      <!-- BACK END DEVELOPER: submit the files and options here, then send the user to the dashboard (result page). -->
+    </aside>
+  </main>
+
+  <script>
+    /* Front-end only. Files are read in the browser and never sent anywhere. */
+    const ALLOWED = ["csv", "xlsx", "xml", "txt", "pdf", "json"];
+    let files = [];   // each item: { file, ok }
+
+    const dropzone   = document.getElementById("dropzone");
+    const fileInput  = document.getElementById("file-input");
+    const listEl     = document.getElementById("upload-list");
+    const emptyEl    = document.getElementById("empty-state");
+    const countPill  = document.getElementById("count-pill");
+    const statusPill = document.getElementById("status-pill");
+    const readyEl    = document.getElementById("summary-ready");
+    const badEl      = document.getElementById("summary-bad");
+    const generateBtn  = document.getElementById("generate-btn");
+
+    function extOf(name) {
+      return name.includes(".") ? name.split(".").pop().toLowerCase() : "";
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function addFiles(fileList) {
+      Array.from(fileList).forEach((file) => {
+        const duplicate = files.some((f) => f.file.name === file.name && f.file.size === file.size);
+        if (!duplicate) files.push({ file, ok: ALLOWED.includes(extOf(file.name)) });
+      });
+      render();
+    }
+
+    function removeFile(index) {
+      files.splice(index, 1);
+      render();
+    }
+
+    function render() {
+      listEl.textContent = "";
+
+      files.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = "upload-item";
+
+        const icon = document.createElement("span");
+        icon.className = "file-icon";
+        icon.textContent = extOf(item.file.name).toUpperCase().slice(0, 4) || "FILE";
+
+        const info = document.createElement("div");
+        info.className = "file-info";
+        const name = document.createElement("span");
+        name.className = "file-title";
+        name.textContent = item.file.name;
+        const meta = document.createElement("span");
+        meta.className = "file-meta";
+        meta.textContent = formatSize(item.file.size);
+        info.append(name, meta);
+
+        const badge = document.createElement("span");
+        badge.className = "badge " + (item.ok ? "badge-ok" : "badge-bad");
+        badge.textContent = item.ok ? "Ready" : "Unsupported type";
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "btn-remove";
+        del.setAttribute("aria-label", "Remove " + item.file.name);
+        del.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12"/><path d="M8 6V4h4v2"/><path d="M6 6l1 10h6l1-10"/></svg>';
+        del.addEventListener("click", () => removeFile(index));
+
+        li.append(icon, info, badge, del);
+        listEl.append(li);
+      });
+
+      const ready = files.filter((f) => f.ok).length;
+      const bad = files.length - ready;
+
+      emptyEl.hidden = files.length > 0;
+      countPill.textContent = files.length + (files.length === 1 ? " file" : " files");
+
+      readyEl.textContent = files.length === 0
+        ? "No files to check yet"
+        : ready + (ready === 1 ? " file is" : " files are") + " ready for analysis";
+      badEl.hidden = bad === 0;
+      badEl.textContent = bad + (bad === 1 ? " file has" : " files have") + " an unsupported type and will be skipped";
+
+      statusPill.textContent = ready > 0 ? "Ready" : "Waiting";
+      statusPill.classList.toggle("is-ready", ready > 0);
+      generateBtn.disabled = ready === 0;
+    }
+
+    /* Choose files button */
+    document.getElementById("choose-btn").addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      addFiles(fileInput.files);
+      fileInput.value = "";      // lets you pick the same file again later
+    });
+
+    /* Drag and drop */
+    ["dragenter", "dragover"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add("is-dragging"); }));
+    ["dragleave", "drop"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove("is-dragging"); }));
+    dropzone.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+
+    /* Generate report: for now, just moves on to the dashboard (result page).
+       The back end will process the files first, then redirect. */
+    generateBtn.addEventListener("click", () => {
+      window.location.href = "../dashboard/dashboard.html";
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report Generator | Dashboard</title>
+
+  <!-- Relative path so you can preview with Live Server.
+       When wiring to Django later, swap for: {% load static %} and
+       href="{% static 'dashboard/css/dashboard.css' %}" -->
+  <link rel="stylesheet" href="../../static/dashboard/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- ===== SIDEBAR: files used ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">Report Generator</div>
+
+      <div class="sidebar-heading">Files used</div>
+
+      <ul class="file-list" id="file-list">
+        <!-- Placeholder items. Back end will generate these later. -->
+        <li class="file-item" data-file="test_results_q3_a.csv" data-type="CSV">
+          <button type="button" class="file-row" aria-expanded="false">
+            <span class="file-name">test_results_q3_a.csv</span><span class="file-type">CSV</span>
+          </button>
+          <div class="file-actions" hidden>
+            <button type="button" class="btn-preview">Preview</button>
+            <button type="button" class="btn-delete">Delete</button>
+          </div>
+        </li>
+
+        <li class="file-item" data-file="station_2_export.xlsx" data-type="XLSX">
+          <button type="button" class="file-row" aria-expanded="false">
+            <span class="file-name">station_2_export.xlsx</span><span class="file-type">XLSX</span>
+          </button>
+          <div class="file-actions" hidden>
+            <button type="button" class="btn-preview">Preview</button>
+            <button type="button" class="btn-delete">Delete</button>
+          </div>
+        </li>
+
+        <li class="file-item" data-file="line_4_log.txt" data-type="TXT">
+          <button type="button" class="file-row" aria-expanded="false">
+            <span class="file-name">line_4_log.txt</span><span class="file-type">TXT</span>
+          </button>
+          <div class="file-actions" hidden>
+            <button type="button" class="btn-preview">Preview</button>
+            <button type="button" class="btn-delete">Delete</button>
+          </div>
+        </li>
+
+        <li class="file-item" data-file="calibration_run.xml" data-type="XML">
+          <button type="button" class="file-row" aria-expanded="false">
+            <span class="file-name">calibration_run.xml</span><span class="file-type">XML</span>
+          </button>
+          <div class="file-actions" hidden>
+            <button type="button" class="btn-preview">Preview</button>
+            <button type="button" class="btn-delete">Delete</button>
+          </div>
+        </li>
+
+        <li class="file-item" data-file="archive_2025.pdf" data-type="PDF">
+          <button type="button" class="file-row" aria-expanded="false">
+            <span class="file-name">archive_2025.pdf</span><span class="file-type">PDF</span> 
+          </button>
+          <div class="file-actions" hidden>
+            <button type="button" class="btn-preview">Preview</button>
+            <button type="button" class="btn-delete">Delete</button>
+          </div>
+        </li>
+      </ul>
+
+      <p class="empty-note" id="empty-note" hidden>No files left. Import a file to generate a report.</p>
+    </aside>
+
+    <!-- ===== MAIN AREA ===== -->
+    <div class="main">
+
+      <!-- Top bar: dashboard name + download -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <!-- Sidebar toggle button -->
+          <button type="button" id="sidebar-toggle" class="sidebar-toggle"
+                  aria-label="Toggle sidebar" aria-expanded="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="5" x2="17" y2="5"/>
+              <line x1="3" y1="10" x2="17" y2="10"/>
+              <line x1="3" y1="15" x2="17" y2="15"/>
+            </svg>
+          </button>
+
+          <div class="topbar-title">
+            <h1>Dashboard Name</h1>
+            <p>Generated report</p>
+          </div>
+        </div>
+
+        <details class="download">
+          <summary class="btn-download">Download</summary>
+          <ul class="download-menu">
+            <li><button type="button">PDF (.pdf)</button></li>
+            <li><button type="button">Excel (.xlsx)</button></li>
+            <li><button type="button">CSV (.csv)</button></li>
+            <li><button type="button">Word (.docx)</button></li>
+          </ul>
+        </details>
+      </header>
+
+      <!-- Content: empty container for the automated dashboard -->
+      <main class="content">
+        <div id="dashboard-container" class="dashboard-container">
+          <!-- BACK END DEVELOPER: render the generated report inside this div. -->
+          <p class="placeholder-text">Generated report will appear here</p>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===== PREVIEW MODAL ===== -->
+  <dialog id="preview-modal" class="preview-modal" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h2 id="modal-title">File name</h2>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close preview">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- BACK END DEVELOPER: show the real file contents inside this div. -->
+      <div class="preview-box" id="preview-box">File preview will appear here</div>
+    </div>
+  </dialog>
+
+  <script>
+    /* ---- Collapse / expand the sidebar ---- */
+    const layout = document.querySelector(".layout");
+    const toggle = document.getElementById("sidebar-toggle");
+
+    toggle.addEventListener("click", () => {
+      const collapsed = layout.classList.toggle("sidebar-collapsed");
+      toggle.setAttribute("aria-expanded", String(!collapsed));
+    });
+
+    /* ---- File actions (Preview / Delete) ---- */
+    const fileItems  = document.querySelectorAll(".file-item");
+    const emptyNote  = document.getElementById("empty-note");
+    const modal      = document.getElementById("preview-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const previewBox = document.getElementById("preview-box");
+
+    function closeAllActions() {
+      document.querySelectorAll(".file-item").forEach((item) => {
+        item.classList.remove("is-open");
+        item.querySelector(".file-actions").hidden = true;
+        item.querySelector(".file-row").setAttribute("aria-expanded", "false");
+      });
+    }
+
+    fileItems.forEach((item) => {
+      const row     = item.querySelector(".file-row");
+      const actions = item.querySelector(".file-actions");
+
+      // Click a file: show or hide its Preview / Delete buttons
+      row.addEventListener("click", () => {
+        const willOpen = actions.hidden;
+        closeAllActions();
+        if (willOpen) {
+          actions.hidden = false;
+          item.classList.add("is-open");
+          row.setAttribute("aria-expanded", "true");
+        }
+      });
+
+      // Preview: open the modal
+      item.querySelector(".btn-preview").addEventListener("click", () => {
+        modalTitle.textContent = item.dataset.file;
+        previewBox.textContent = "Preview of " + item.dataset.file + " (" + item.dataset.type + ") will appear here";
+        modal.showModal();
+      });
+
+      // Delete: remove from the list (front-end demo only; back end will do the real delete)
+      item.querySelector(".btn-delete").addEventListener("click", () => {
+        item.remove();
+        if (document.querySelectorAll(".file-item").length === 0) {
+          emptyNote.hidden = false;
+        }
+      });
+    });
+
+    /* ---- Close the modal: X button or click outside the box ---- */
+    document.getElementById("modal-close").addEventListener("click", () => modal.close());
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.close();
+    });
+  </script>
+</body>
+</html>
